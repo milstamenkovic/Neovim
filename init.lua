@@ -1,7 +1,7 @@
 -- Mil Stamenković Neovim init.lua
 -- Repo: https://github.com/milstamenkovic/neovim
 -- Created: 03h01'00'' - 03.05.2026. - Ćuprija, Serbia - Mil Stamenković
--- Revised: 03h10'55'' - 10.05.2026. - Ćuprija, Serbia - Mil Stamenković
+-- Revised: 01h41'03'' - 11.05.2026. - Ćuprija, Serbia - Mil Stamenković
 
 
 
