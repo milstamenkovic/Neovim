@@ -24,8 +24,6 @@ vim.opt.termguicolors = true
 
 -- SYNTAX COLORING
 vim.cmd("syntax on")
-vim.cmd('filetype on')
-
 
 
 
@@ -100,6 +98,66 @@ vim.opt.shellredir = "| Out-File -Encoding UTF8 %s"
 
 
 
+-- NVIM-TREE 
+-- NVIM-TREE 
+-- NVIM-TREE 
+local nvim_tree_api = nil
+local function get_api()
+  if not nvim_tree_api then
+    nvim_tree_api = require("nvim-tree.api")
+  end
+  return nvim_tree_api
+end
+-- on_attach
+local function my_on_attach(bufnr)
+  local api = get_api()
+  local function opts(desc)
+    return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+  end
+  api.config.mappings.default_on_attach(bufnr)
+  vim.keymap.set('n', 'h',          api.node.navigate.parent_close, opts("Close Directory"))
+  vim.keymap.set('n', '<leader>s',  api.node.open.vertical,         opts("Open Vertical Split"))
+  vim.keymap.set('n', 'C',          api.tree.change_root_to_node,   opts("Change Root To Node"))
+  vim.keymap.set('n', '-',          api.tree.change_root_to_parent, opts("Change Root To Parent"))
+end
+-- Keep blank buffer when last file is closed
+vim.api.nvim_create_autocmd("BufEnter", {
+  nested = true,
+  callback = function()
+    local non_tree_wins = vim.tbl_filter(function(w)
+      return vim.bo[vim.api.nvim_win_get_buf(w)].filetype ~= "NvimTree"
+    end, vim.api.nvim_list_wins())
+    if #non_tree_wins == 0 then vim.cmd("enew") end
+  end,
+})
+-- Auto-open on VimEnter
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function(data)
+    if vim.fn.isdirectory(data.file) == 1 then
+      vim.cmd.cd(data.file)
+    end
+    get_api().tree.open()
+    vim.cmd("wincmd p")
+  end,
+})
+-- Reopen after NeovimProject session load
+vim.api.nvim_create_autocmd("User", {
+  pattern = "SessionLoadPost",
+  callback = function()
+    get_api().tree.open()
+  end,
+})
+
+
+
+
+
+
+
+
+
+
+
 
 -- LAZY.NVIM
 -- LAZY.NVIM
@@ -126,6 +184,7 @@ require("lazy").setup({
     config = function()
 			require('telescope').setup()
     end,
+		lazy = false,
   },
 	-- NEOVIM-PROJECT
 	{
@@ -151,10 +210,9 @@ require("lazy").setup({
 			-- optional picker
 			{ "ibhagwan/fzf-lua" },
 			-- optional picker
-			{ "folke/snacks.nvim" },
 			{ "Shatur/neovim-session-manager" },
 		},
-		lazy = false,
+		event = "VeryLazy",
 		priority = 100,
 	},
   -- NVIM-TREE
@@ -183,7 +241,7 @@ require("lazy").setup({
         },
 				view = {
 					width = "20%",
-					side = left,
+					side = "left",
 				},
       })
     end,
@@ -193,7 +251,8 @@ require("lazy").setup({
     "lewis6991/gitsigns.nvim",
     config = function()
       require('gitsigns').setup()
-    end
+    end,
+		lazy = false,
   },
   -- NEOGIT
   {
@@ -203,12 +262,14 @@ require("lazy").setup({
       "sindrets/diffview.nvim",
       "nvim-telescope/telescope.nvim",
     },
-    config = true
+		lazy = false,
+    config = true,
   },
   -- AUTO-PAIRS
   {
     'windwp/nvim-autopairs',
     event = "InsertEnter",
+		lazy = false,
     config = true
   },
   -- AUTO-TAGS
@@ -273,28 +334,28 @@ require("lazy").setup({
     end
 	},
 	-- THEMES
-	-- TOKYONIGHT THEMES
+	-- THEMES
+	-- THEMES
 	{
     "folke/tokyonight.nvim",
-    lazy = false,
-    priority = 1000,
-    config = function()
-      vim.cmd([[colorscheme tokyonight-night]])
-    end,
   },
   {
-	  "nyoom-engineering/oxocarbon.nvim"
-  -- Add in any other configuration; 
-  --   event = foo, 
-  --   config = bar
-  --   end,
+	  "nyoom-engineering/oxocarbon.nvim",
 	},
 	{
 		"bluz71/vim-moonfly-colors",
-		name = "moonfly",
-		lazy = false,
-		priority = 1000
-	}
+	},
+	{ 
+		"datsfilipe/vesper.nvim"
+	},
+	{
+		"tiesen243/vercel.nvim",
+		config = function()
+        require("vercel").setup({
+            theme = "dark"        -- String: Sets the theme to light or dark (Default: light)
+        })
+		end,
+	},
 })
 
 
@@ -310,62 +371,6 @@ require("lazy").setup({
 
 
 
-
--- NVIM-TREE 
--- Toggle NVIM.TREE  Keybind Tt
-vim.keymap.set('n', 'Tt', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
--- Nvim.tree
-local function my_on_attach(bufnr)
-  local api = require("nvim-tree.api")
-  local function opts(desc)
-    return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
-  end
-	-- Apply defauly mappings
-  api.config.mappings.default_on_attach(bufnr)
-	-- Custom Keybindings
-	vim.keymap.set('n', 'h', api.node.navigate.parent_close, opts("Close Directory"))
-  vim.keymap.set('n', '<leader>s', api.node.open.vertical,         opts("Open Vertical Split"))
-  vim.keymap.set('n', 'C', api.tree.change_root_to_node,   opts("Change Root To Node"))
-  vim.keymap.set('n', '-', api.tree.change_root_to_parent, opts("Change Root To Parent"))
-end
--- Keep blank buffer when last file is closed
-vim.api.nvim_create_autocmd("BufEnter", {
-  nested = true,
-  callback = function()
-    local wins = vim.api.nvim_list_wins()
-    local non_tree_wins = vim.tbl_filter(function(w)
-      return vim.bo[vim.api.nvim_win_get_buf(w)].filetype ~= "NvimTree"
-    end, wins)
-    if #non_tree_wins == 0 then
-      vim.cmd("enew")
-    end
-  end,
-})
--- Auto-open with Neovim - But don't open if file is opening Neovim
-vim.api.nvim_create_autocmd("VimEnter", {
-  callback = function(data)
-    -- Buffer is a directory?
-    local is_directory = vim.fn.isdirectory(data.file) == 1
-    if is_directory then
-      -- Change to the directory
-      vim.cmd.cd(data.file)
-      -- Open the tree
-      require("nvim-tree.api").tree.open()
-    else
-      -- If it's just a file (like index.html), open the tree and jump back to the file
-      require("nvim-tree.api").tree.open()
-      vim.cmd("wincmd p")
-    end
-  end
-})
-
--- NEOVIMPROJECT WON'T CLOSE NVIMTREE
-vim.api.nvim_create_autocmd("User", {
-  pattern = "SessionLoadPost",
-  callback = function()
-    require("nvim-tree.api").tree.open()
-  end,
-})
 
 
 
@@ -419,6 +424,9 @@ vim.keymap.set('n', 'cob', '<cmd>%bd|e#|bd#<cr>', { desc = 'Close all buffers ex
 
 -- ALT+CTRL+x = :qa! = Quit Neovim without saving
 vim.keymap.set('n', '<M-C-x>', ':qa<CR>', { silent = true })
+
+-- SHIFT+t+t = Toggle Nevim-Tree
+vim.keymap.set('n', 'Tt', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
 
 -- ALT+d = :NeovimProjectDiscover = Projects
 vim.keymap.set('n', '<M-d>', ':NeovimProjectDiscover<CR>', { silent = true })
