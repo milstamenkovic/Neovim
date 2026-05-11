@@ -14,6 +14,10 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
   command = "syntax sync fromstart",
 })
 
+
+
+
+
 -- 24-bit COLORS
 -- (This goes before themes and colors)
 vim.opt.termguicolors = true
@@ -25,14 +29,15 @@ vim.cmd('filetype on')
 
 
 
-
-
-
-
-
-
 -- CURSOR - BLOCK CURSOR
 vim.opt.guicursor = "n-c-i:block-blinkon0,v-ve:ver20-blinkon0"
+
+
+
+-- VSPLIT TO RIGHT
+vim.opt.splitright = true
+-- SPLIT TO RIGHT AND BELOW
+vim.opt.splitbelow = true
 
 
 
@@ -97,6 +102,8 @@ vim.opt.shellredir = "| Out-File -Encoding UTF8 %s"
 
 
 -- LAZY.NVIM
+-- LAZY.NVIM
+-- LAZY.NVIM
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -108,6 +115,8 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- PLUGINS
+-- PLUGINS
 -- PLUGINS
 require("lazy").setup({
   -- TELESCOPE
@@ -147,7 +156,7 @@ require("lazy").setup({
 		},
 		lazy = false,
 		priority = 100,
-	},	
+	},
   -- NVIM-TREE
   {
     "nvim-tree/nvim-tree.lua",
@@ -308,14 +317,14 @@ vim.keymap.set('n', 'Tt', ':NvimTreeToggle<CR>', { noremap = true, silent = true
 -- Nvim.tree
 local function my_on_attach(bufnr)
   local api = require("nvim-tree.api")
-  local opts = function(desc)
+  local function opts(desc)
     return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
   end
+	-- Apply defauly mappings
   api.config.mappings.default_on_attach(bufnr)
+	-- Custom Keybindings
 	vim.keymap.set('n', 'h', api.node.navigate.parent_close, opts("Close Directory"))
-  vim.keymap.set('n', 'l', api.node.open.edit,             opts("Open"))
-  vim.keymap.set('n', 's', api.node.open.vertical,         opts("Open Vertical Split"))
-  vim.keymap.set('n', 'v', api.node.open.horizontal,       opts("Open Horizontal Split"))
+  vim.keymap.set('n', '<leader>s', api.node.open.vertical,         opts("Open Vertical Split"))
   vim.keymap.set('n', 'C', api.tree.change_root_to_node,   opts("Change Root To Node"))
   vim.keymap.set('n', '-', api.tree.change_root_to_parent, opts("Change Root To Parent"))
 end
