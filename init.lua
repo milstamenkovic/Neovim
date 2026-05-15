@@ -331,7 +331,72 @@ require("lazy").setup({
             extensions = {}
         })
     end
-	},
+  },
+  -- LSP AND MASON
+	{
+    "neovim/nvim-lspconfig",
+    dependencies = {
+      { "williamboman/mason.nvim", opts = {} }, -- Simplified init
+      { "williamboman/mason-lspconfig.nvim", opts = {
+          ensure_installed = { "html", "cssls", "vtsls" },
+          -- This is the critical part for v0.12:
+          -- It automatically runs vim.lsp.enable() for you
+          automatic_installation = true,
+        }
+      },
+    },
+    config = function()
+      -- In Neovim 0.12, we don't need complex setup loops.
+      -- We simply enable the servers we want to use.
+      
+      local servers = { "html", "cssls", "vtsls" }
+      
+      for _, server in ipairs(servers) do
+        -- This is the new standard API for 0.12
+        vim.lsp.enable(server)
+      end
+    end,
+  },
+	-- SUGGESTIONS HTML, CSS, JAVASCRIPT
+  {
+    'hrsh7th/nvim-cmp',
+    dependencies = {
+      'hrsh7th/cmp-nvim-lsp',     -- Suggestions from the LSP
+      'hrsh7th/cmp-path',         -- Suggestions for file paths
+      'L3MON4D3/LuaSnip',         -- Snippet engine (mandatory)
+      'saadparwaiz1/cmp_luasnip', -- Connects snippets to suggestions
+    },
+    config = function()
+      local cmp = require('cmp')
+      local luasnip = require('luasnip')
+
+      cmp.setup({
+        snippet = {
+          expand = function(args)
+            luasnip.lsp_expand(args.body)
+          end,
+        },
+        mapping = cmp.mapping.preset.insert({
+          ['<C-Space>'] = cmp.mapping.complete(), -- Trigger suggestions manually
+          ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Enter to pick
+          ['<Tab>'] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable() then
+              luasnip.expand_or_jump()
+            else
+              fallback()
+            end
+          end, { 'i', 's' }),
+        }),
+        sources = cmp.config.sources({
+          { name = 'nvim_lsp' }, -- This pulls from your HTML/CSS/JS servers
+          { name = 'luasnip' },
+          { name = 'path' },
+        })
+      })
+    end,
+  },
 	-- THEMES
 	-- THEMES
 	-- THEMES
