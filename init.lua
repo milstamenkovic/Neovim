@@ -1,8 +1,7 @@
 -- Mil Stamenković Neovim init.lua
 -- Repo: https://github.com/milstamenkovic/neovim
 -- Created: 03h01'00'' - 03.05.2026. - Ćuprija, Serbia - Mil Stamenković
--- Revised: 01h41'03'' - 11.05.2026. - Ćuprija, Serbia - Mil Stamenković
-
+-- Revised: 18h23'58'' - 15.05.2026. - Ćuprija, Serbia - Mil Stamenković
 
 
 
@@ -192,7 +191,7 @@ require("lazy").setup({
 		opts = {
 		projects = (function()
   		local data = vim.fn.stdpath("data")
-  		local ok, paths = pcall(dofile, data .. "/neovim-project/projects-paths.lua")
+  		local ok, paths = pcall(dofile, data .. "/neovim-project/mil-projects-paths.lua")
   		return ok and paths or {}
 		end)(),
 		picker = {
@@ -352,8 +351,8 @@ require("lazy").setup({
 		"tiesen243/vercel.nvim",
 		config = function()
         require("vercel").setup({
-            theme = "dark"        -- String: Sets the theme to light or dark (Default: light)
-        })
+            theme = "dark"
+				})
 		end,
 	},
 })
@@ -392,10 +391,9 @@ require("lazy").setup({
 -- THEMES
 
 -- MIL NEOVIM THEME
--- vim.cmd("colorscheme milTheme")
-
 vim.opt.background = "dark" -- set this to dark or light
-vim.cmd("colorscheme tokyonight-night")
+-- vim.cmd("colorscheme milTheme")
+vim.cmd("colorscheme vesper")
 
 
 
@@ -406,27 +404,31 @@ vim.cmd("colorscheme tokyonight-night")
 -- KEYBIDINGS
 -- KEYBIDINGS
 -- KEYBIDINGS
+-- Leader is \
 -- C = CTRL
 -- capital letter = SHIFT
 -- M = ALT
 -- <CR> = Carriage Return = Enter
 
--- CTRL+n = New buffer
+-- CTRL+n == New buffer
 vim.keymap.set('n', '<C-n>', ':enew<CR>', { silent = true })
 
--- ALT+n = New tab
+-- ALT+n == New tab
 vim.keymap.set('n', '<M-n>', ':tabnew<CR>', { silent = true })
--- ALT+c = Close tab
+-- ALT+c == Close tab
 vim.keymap.set('n', '<M-c>', ':tabclose<CR>', { silent = true })
 
--- cob = CLEAR OTHER BUFFERS (EXCEPT CURRENT FILE)
+-- cob == CLEAR OTHER BUFFERS (EXCEPT CURRENT FILE)
 vim.keymap.set('n', 'cob', '<cmd>%bd|e#|bd#<cr>', { desc = 'Close all buffers except current' })
 
--- ALT+CTRL+x = :qa! = Quit Neovim without saving
+-- ALT+CTRL+x == Quit Neovim
 vim.keymap.set('n', '<M-C-x>', ':qa<CR>', { silent = true })
 
--- SHIFT+t+t = Toggle Nevim-Tree
+-- SHIFT+t+t == Toggle Nevim-Tree
 vim.keymap.set('n', 'Tt', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
 
--- ALT+d = :NeovimProjectDiscover = Projects
+-- ALT+d == Projects
 vim.keymap.set('n', '<M-d>', ':NeovimProjectDiscover<CR>', { silent = true })
+
+-- LEADER+w == Write/Save
+vim.keymap.set('n', '<LEADER>w', ':w<CR>', { silent = true })
